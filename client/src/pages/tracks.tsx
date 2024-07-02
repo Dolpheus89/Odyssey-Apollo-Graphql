@@ -1,12 +1,46 @@
-import React from "react";
 import { Layout } from "../components";
+import { gql } from "../__generated__";
+import { useQuery } from "@apollo/client";
+import TrackCard from "../containers/track-card";
+import { LoadingSpinner } from "@apollo/space-kit/Loaders/LoadingSpinner";
 
-/**
- * Tracks Page is the Catstronauts home page.
- * We display a grid of tracks fetched with useQuery with the TRACKS query
- */
 const Tracks = () => {
-  return <Layout grid> </Layout>;
+
+
+const TRACKS = gql(`
+  query GetTracks {
+    tracksForHome {
+      id
+      title
+      thumbnail
+      length
+      modulesCount
+      author {
+        id
+        name
+        photo
+      }
+    }
+  }
+`);
+
+const { loading, error, data } = useQuery(TRACKS);
+
+if (loading) {
+  return (
+
+      <LoadingSpinner data-testid="spinner" size="large" theme="grayscale" />
+
+  );
+}
+  if (error) return `Error! ${error.message}`;
+  return (
+    <Layout grid>
+  {data?.tracksForHome?.map((track) => (
+    <TrackCard key={track.id} track={track} />
+  ))}
+</Layout>
+  )
 };
 
 export default Tracks;
